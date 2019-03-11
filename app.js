@@ -16,6 +16,9 @@ GAME RULES:
 //First create the game variables
 var scores, roundScores, activePlayer/*, dice*/;
 
+//state variables - is the game playing or is not playing
+var gamePlaying;
+
 
 
 //CREATE RANDOM NUMBERS 1 TO 6
@@ -71,29 +74,33 @@ init();
 
 //For this we can use an anonymous function
 document.querySelector('.btn-roll').addEventListener('click', function(){
-    //1. We need the random number
-    var dice = Math.floor(Math.random() * 6) + 1;
-    
-    //2.Display the result
-    //First display the dice
-    var diceDOM = document.querySelector('.dice');
-    //First display the dice
-    diceDOM.style.display = 'block';
-    //Display the image of the dice based on the dice value
-    diceDOM.src = 'dice-' + dice + '.png'
-    //Second
-    
-    //3.Update the round score ONLY IF the rolled number was NOT 1
-    
-    if (dice !== 1){
-        //Add score
-        roundScore += dice;
-        //Set the content of the roundScore to the current player
-        document.querySelector('#current-' + activePlayer).textContent = roundScore;
-    }
-    else{
-        //We apply DRY priciple because we need the code from here to be the same as in the below function
-        nextPlayer();
+    //check if game is playing and is not finished 
+    if(gamePlaying){
+        //1. We need the random number
+        var dice = Math.floor(Math.random() * 6) + 1;
+
+        //2.Display the result
+        //First display the dice
+        var diceDOM = document.querySelector('.dice');
+        //First display the dice
+        diceDOM.style.display = 'block';
+        //Display the image of the dice based on the dice value
+        diceDOM.src = 'dice-' + dice + '.png'
+        //Second
+
+        //3.Update the round score ONLY IF the rolled number was NOT 1
+
+        if (dice !== 1){
+            //Add score
+            roundScore += dice;
+            //Set the content of the roundScore to the current player
+            document.querySelector('#current-' + activePlayer).textContent = roundScore;
+        }
+        else{
+            //We apply DRY priciple because we need the code from here to be the same as in the below function
+            nextPlayer();
+        }
+        
     }
 });
 
@@ -101,31 +108,32 @@ document.querySelector('.btn-roll').addEventListener('click', function(){
 //NOW LET'S ADD ANOTHER EVENT LISTNER
 //FOR HOLD BUTTON
 document.querySelector('.btn-hold').addEventListener('click', function(){
-    //Add CURRENT SCORE to GLOBAL SCORE
-    scores[activePlayer] += roundScore;
-    
-    
-    //Update the UI
-    document.querySelector('#score-' + activePlayer).textContent = scores[activePlayer]; 
-    
-    
-    //Check if player won the game
-    if ( scores[activePlayer] >= 10 ){
-        winGame();
-    }
-    else{
+    //check for the state again if game is playing or not
+    if(gamePlaying){
+        
+        //Add CURRENT SCORE to GLOBAL SCORE
+        scores[activePlayer] += roundScore;
 
-        //we will apply the DRY principle - don't repeat yourself
-        //We implement the nextPlayer function
-        nextPlayer(); 
-    }
-    
-    
 
-    
-    
+        //Update the UI
+        document.querySelector('#score-' + activePlayer).textContent = scores[activePlayer]; 
 
+
+        //Check if player won the game
+        if ( scores[activePlayer] >= 10 ){
+            winGame();
+
+            gamePlaying = false;
+        }
+        else{
+
+            //we will apply the DRY principle - don't repeat yourself
+            //We implement the nextPlayer function
+            nextPlayer(); 
+        }
     
+    
+    }   
     
 });
 
@@ -175,7 +183,9 @@ function init(){
     scores = [0, 0];
     activePlayer = 0;
     roundScore = 0;
-
+    
+    //game state initialize to true
+    gamePlaying = true;
 
     //querySelector can be used to change the css of the page
     //for the dice class - we want to hide the dice (notice the . is for classes)
